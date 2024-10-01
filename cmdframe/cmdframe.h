@@ -56,16 +56,9 @@ class CmdFrame {
      * @brief Start execution of a frame.
      * @details Execute hander and return by means of the `next_key`.
      */
-    int Execute() const;
+    finf_id_t Execute() const;
 
   public:
-    /**
-     * @brief Default constructor.
-     * @details Create an empty frame(do nothing). `init_type` is DEFAULT.
-     */
-    explicit CmdFrame(std::function<int()> frame_main,
-                      InitType init_type = InitType::DEFAULT)
-        : frame_main(frame_main), init_type(init_type) {}
     template <typename Function, typename... Args>
     /**
      * @brief Create a frame with a function.

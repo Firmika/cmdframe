@@ -10,6 +10,8 @@ using std::pair;
 using std::tuple;
 using std::vector;
 
+using item_id_t = int;
+using mevent_id_t = int;
 #define MEVENT_CONTINUE 0
 #define MEVENT_CANCEL -1
 #define MEVENT_REDIRECT(n) ((n) + 1)
@@ -22,7 +24,7 @@ using std::vector;
  */
 class CmdMenu : public CmdFrame {
   public:
-    CmdMenu(vector<std::string> item_descs = {}, std::string &&title = "",
+    CmdMenu(vector<std::string> &&item_descs = {}, std::string &&title = "",
             std::string &&desc = "", std::function<void()> on_enter = nullptr,
             std::function<void()> on_exit = nullptr, bool memorize = true);
     /**
@@ -32,7 +34,7 @@ class CmdMenu : public CmdFrame {
      * `MEVENT_CANCEL`: Stay in current menu
      * `MEVENT_REDIRECT(n)`: Redirect to other output interface
      */
-    CmdMenu(vector<pair<std::string, std::function<int()>>> menu_event_pairs,
+    CmdMenu(vector<pair<std::string, std::function<int()>>> &&menu_event_pairs,
             std::string &&title = "", std::string &&desc = "",
             std::function<void()> on_enter = nullptr,
             std::function<void()> on_exit = nullptr, bool memorize = true);
@@ -53,9 +55,9 @@ class CmdMenu : public CmdFrame {
                   const map<std::string, std::string> &args = {});
     void SetDesc(const std::string &desc,
                  const map<std::string, std::string> &args = {});
-    void SetArg(const std::string &argName, const std::string &val);
-    void SetArg(const std::string &argName, const char *val);
-    void SetArg(const std::string &argName, int val);
+    void SetArg(const std::string &arg_name, const std::string &val);
+    void SetArg(const std::string &arg_name, const char *val);
+    void SetArg(const std::string &arg_name, int val);
     /**
      * @brief Bind a function as menu on enter.
      * @note func must be a function that returns void
@@ -87,20 +89,6 @@ class CmdMenu : public CmdFrame {
      */
     size_t Size() const;
 
-  private:
-    /**
-     * @struct MenuItem
-     * @brief Definition of a menu item
-     *        with item desc, description and handler.
-     */
-    struct MenuItem {
-        std::string desc;
-        std::function<int()> event;
-        MenuItem(std::string &&desc, std::function<int()> event)
-            : desc(desc), event(event) {}
-    };
-    using ArgList = map<std::string, std::string>;
-
   protected:
     inline std::string GetItemDesc(int index) const {
         return menu_items[index].desc;
@@ -114,13 +102,27 @@ class CmdMenu : public CmdFrame {
     /**
      * @note To modify the style of the menu, just override this method.
      */
-    virtual void DisplayMenu() const;
+    virtual item_id_t DisplayAndSelect();
 
   private:
-    int MenuMain();
-    int SelectItem();
+    finf_id_t MenuMain();
     static std::string ReplaceArgs(const std::string &ori,
                                    const map<std::string, std::string> &args);
+
+  private:
+    /**
+     * @struct MenuItem
+     * @brief Definition of a menu item
+     *        with item desc, event.
+     */
+    struct MenuItem {
+        std::string desc;
+        std::function<int()> event;
+        MenuItem() {}
+        MenuItem(const std::string &desc, const std::function<int()> &event)
+            : desc(desc), event(event) {}
+    };
+    using ArgList = map<std::string, std::string>;
 
   private:
     vector<MenuItem> menu_items;
@@ -128,6 +130,8 @@ class CmdMenu : public CmdFrame {
     ArgList args;
     std::function<void()> on_enter, on_exit;
     bool memorize;
-    int curIndex = 0;
+
+  protected:
+    int cur_index = 0;
 };
 #endif
