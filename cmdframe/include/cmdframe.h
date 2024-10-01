@@ -2,16 +2,12 @@
 #define __CMDFRAME_H__
 
 #include <functional>
-#include <string>
-#include <vector>
 
-using std::function;
-using std::string;
-
-#define NKEY_BACK 0
-#define NKEY_SELF -1
-#define NKEY_EXIT -2
-#define NKEY_FRAME(n) ((n) + 1)
+using finf_id_t = int;
+#define FINF_BACK 0
+#define FINF_SELF -1
+#define FINF_EXIT -2
+#define FINF_FRAME(n) ((n) + 1)
 
 /**
  * @class CmdFrame
@@ -40,6 +36,8 @@ class CmdFrame {
      * @note func must be a function that returns void
      * To bind a member functin, use `std::bind`.
      * To bind a argument as reference, use `std::ref`.
+     * @param return_key The next Frame to enter after execution.
+     * possible values: NKEY_BACK, NKEY_SELF, NKEY_EXIT, NKEY_FRAME(n)
      */
     template <typename Function, typename... Args>
     void Bind(int return_key, Function &&func, Args &&...args) {
@@ -53,7 +51,7 @@ class CmdFrame {
     /**
      * @brief Set init type of the frame.
      */
-    void SetInitType(InitType init_type) { this->init_type = init_type; }
+    inline void SetInitType(InitType init_type) { this->init_type = init_type; }
     /**
      * @brief Start execution of a frame.
      * @details Execute hander and return by means of the `next_key`.
@@ -65,15 +63,30 @@ class CmdFrame {
      * @brief Default constructor.
      * @details Create an empty frame(do nothing). `init_type` is DEFAULT.
      */
-    CmdFrame();
-    explicit CmdFrame(InitType init_type) : init_type(init_type) {}
+    explicit CmdFrame(std::function<int()> frame_main,
+                      InitType init_type = InitType::DEFAULT)
+        : frame_main(frame_main), init_type(init_type) {}
     template <typename Function, typename... Args>
+    /**
+     * @brief Create a frame with a function.
+     * @note func must be a function that returns int
+     * To bind a member functin, use `std::bind`.
+     * To bind a argument as reference, use `std::ref`.
+     */
     CmdFrame(Function &&func, Args &&...args) {
         static_assert(std::is_invocable_r<int, Function, Args...>::value,
                       "Function must return int");
         frame_main = std::bind(std::forward<Function>(func),
                                std::forward<Args>(args)...);
     }
+    /**
+     * @brief Create a frame with a function.
+     * @note func must be a function that returns void
+     * To bind a member functin, use `std::bind`.
+     * To bind a argument as reference, use `std::ref`.
+     * @param return_key The next Frame to enter after execution.
+     * possible values: NKEY_BACK, NKEY_SELF, NKEY_EXIT, NKEY_FRAME(n)
+     */
     template <typename Function, typename... Args>
     CmdFrame(int return_key, Function &&func, Args &&...args) {
         static_assert(std::is_invocable_r<void, Function, Args...>::value,
@@ -83,11 +96,11 @@ class CmdFrame {
             return return_key;
         };
     }
-    CmdFrame(const CmdFrame &other) = delete;
-    virtual ~CmdFrame();
+    // CmdFrame(const CmdFrame &other) = delete;
+    virtual ~CmdFrame() {}
 
   private:
     InitType init_type{InitType::DEFAULT};
-    function<int()> frame_main;
+    std::function<int()> frame_main;
 };
 #endif
