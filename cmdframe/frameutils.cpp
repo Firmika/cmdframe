@@ -1,6 +1,7 @@
 #include "frameutils.h"
 #include <functional>
 #include <iostream>
+#include <algorithm>
 #include <sstream>
 
 using std::cin;

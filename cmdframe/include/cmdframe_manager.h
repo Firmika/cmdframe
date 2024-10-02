@@ -16,6 +16,7 @@
 #ifndef __CMDFRAME_MANAGER_H__
 #define __CMDFRAME_MANAGER_H__
 #include "cmdframe.h"
+#include "cmdmenu.h"
 #include <map>
 #include <string>
 #include <tuple>

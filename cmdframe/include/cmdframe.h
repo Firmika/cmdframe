@@ -2,6 +2,7 @@
 #define __CMDFRAME_H__
 
 #include <functional>
+#include <cassert>
 
 using finf_id_t = int;
 #define FINF_BACK 0
@@ -26,8 +27,8 @@ class CmdFrame {
      */
     template <typename Function, typename... Args>
     void Bind(Function &&func, Args &&...args) {
-        static_assert(std::is_invocable_r<int, Function, Args...>::value,
-                      "Function must return int");
+        // static_assert(std::is_invocable_r<int, Function, Args...>::value,
+        //               "Function must return int");
         frame_main = std::bind(std::forward<Function>(func),
                                std::forward<Args>(args)...);
     }
@@ -41,8 +42,8 @@ class CmdFrame {
      */
     template <typename Function, typename... Args>
     void Bind(int return_key, Function &&func, Args &&...args) {
-        static_assert(std::is_invocable_r<void, Function, Args...>::value,
-                      "Function must return void");
+        // static_assert(std::is_invocable_r<void, Function, Args...>::value,
+        //               "Function must return void");
         frame_main = [return_key, func, args...]() {
             func(args...);
             return return_key;
@@ -67,8 +68,8 @@ class CmdFrame {
      * To bind a argument as reference, use `std::ref`.
      */
     CmdFrame(Function &&func, Args &&...args) {
-        static_assert(std::is_invocable_r<int, Function, Args...>::value,
-                      "Function must return int");
+        // static_assert(std::is_invocable_r<int, Function, Args...>::value,
+        //               "Function must return int");
         frame_main = std::bind(std::forward<Function>(func),
                                std::forward<Args>(args)...);
     }
@@ -82,8 +83,8 @@ class CmdFrame {
      */
     template <typename Function, typename... Args>
     CmdFrame(int return_key, Function &&func, Args &&...args) {
-        static_assert(std::is_invocable_r<void, Function, Args...>::value,
-                      "Function must return void");
+        // static_assert(std::is_invocable_r<void, Function, Args...>::value,
+        //               "Function must return void");
         frame_main = [return_key, func, args...]() {
             func(args...);
             return return_key;

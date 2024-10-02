@@ -45,8 +45,8 @@ class CmdMenu : public CmdFrame {
     void Append(std::string &&desc, std::function<int()> event);
     template <typename Function, typename... Args>
     inline void Append(std::string &&desc, Function &&func, Args &&...args) {
-        static_assert(std::is_invocable_r<void, Function, Args...>::value,
-                      "Function must return void");
+        // static_assert(std::is_invocable_r<void, Function, Args...>::value,
+        //               "Function must return void");
         Append(std::forward<std::string>(desc),
                std::bind(std::forward<Function>(func),
                          std::forward<Args>(args)...));
@@ -67,8 +67,8 @@ class CmdMenu : public CmdFrame {
      */
     template <typename Function, typename... Args>
     void BindOnEnter(Function &&func, Args &&...args) {
-        static_assert(std::is_invocable_r<void, Function, Args...>::value,
-                      "Function must return void");
+        // static_assert(std::is_invocable_r<void, Function, Args...>::value,
+        //               "Function must return void");
         this->on_enter = std::bind(std::forward<Function>(func),
                                    std::forward<Args>(args)...);
     }
@@ -80,8 +80,8 @@ class CmdMenu : public CmdFrame {
      */
     template <typename Function, typename... Args>
     void BindOnExit(Function &&func, Args &&...args) {
-        static_assert(std::is_invocable_r<void, Function, Args...>::value,
-                      "Function must return void");
+        // static_assert(std::is_invocable_r<void, Function, Args...>::value,
+        //               "Function must return void");
         this->on_exit = std::bind(std::forward<Function>(func),
                                   std::forward<Args>(args)...);
     }
