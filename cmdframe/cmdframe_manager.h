@@ -22,6 +22,8 @@
 #include <vector>
 
 using frame_id_t = int;
+#define FID_BACK -1
+#define FID_EXIT -2
 
 /**
  * @class CmdFrameManager
@@ -29,39 +31,52 @@ using frame_id_t = int;
  */
 class CmdFrameManager {
   public:
-    CmdFrameManager();
-    CmdFrameManager(std::vector<CmdFrame *> frameList, bool manage_mem = false,
-                    int enter_frame_id = 0);
-    ~CmdFrameManager();
-
+    CmdFrameManager() {}
+    CmdFrameManager(std::vector<CmdFrame *> frames = {},
+                    bool manage_mem = false, frame_id_t enter_frame_id = 0)
+        : frames(frames), manage_mem(manage_mem),
+          enter_frame_id(enter_frame_id) {
+        frame_keys.resize(frames.size());
+        links.resize(frames.size());
+    }
+    ~CmdFrameManager() {
+        if (manage_mem)
+            for (auto &&frame : frames)
+                delete frame;
+    }
     void Append(CmdFrame *frame);
-    void Append(std::string &&name, CmdFrame *frame);
+    void Append(const std::string &name, CmdFrame *frame);
     void Append(std::vector<CmdFrame *> frames);
     void Append(std::vector<std::pair<std::string, CmdFrame *>> frames);
+    void SetFrameKey(frame_id_t fid, const std::string &key);
     inline void SetEnterFrameID(int enter_frame_id) {
         this->enter_frame_id = enter_frame_id;
     }
-    void SetEnterFrameID(std::string &&key);
-    void Link(frame_id_t ffid, finf_id_t finfid, frame_id_t tfid);
+    void SetEnterFrameID(const std::string &key);
+    inline void Link(frame_id_t ffid, finf_id_t finfid, frame_id_t tfid) {
+        links[ffid][finfid] = tfid;
+    }
     void Link(std::string &&fkey, finf_id_t finfid, frame_id_t tfid);
     void Link(frame_id_t ffid, finf_id_t finfid, std::string &&tkey);
     void Link(std::string &&fkey, finf_id_t finfid, std::string &&tkey);
     template <typename FT, typename TT>
     void Link(std::vector<std::tuple<FT, finf_id_t, TT>> links) {
         for (auto &&link : links)
-            Link(std::get<0>(link), std::get<1>(link), std::get<2>(link));
+            Link((FT)std::get<0>(link), (finf_id_t)std::get<1>(link), (TT)std::get<2>(link));
     }
     /**
      * @brief Get number of frames managed by manager.
      * @return Number of frames managed by manager.
      */
-    size_t Size() const;
+    inline size_t Size() const { return frames.size(); }
     void Execute();
 
   private:
     std::vector<CmdFrame *> frames;
     std::map<std::string, frame_id_t> fkey_to_id;
-    frame_id_t enter_frame_id;
+    std::vector<std::string> frame_keys;
+    std::vector<std::map<finf_id_t, frame_id_t>> links;
+    frame_id_t enter_frame_id{0};
     bool manage_mem;
 };
 

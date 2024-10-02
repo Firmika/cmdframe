@@ -25,8 +25,9 @@ using mevent_id_t = int;
 class CmdMenu : public CmdFrame {
   public:
     CmdMenu(vector<std::string> &&item_descs = {}, std::string &&title = "",
-            std::string &&desc = "", std::function<void()> on_enter = nullptr,
-            std::function<void()> on_exit = nullptr, bool memorize = true);
+            std::string &&desc = "", bool memorize = false,
+            std::function<void()> on_enter = nullptr,
+            std::function<void()> on_exit = nullptr);
     /**
      * @brief Up-Level: set menu items and events.
      * @note return value of event should be next key redirecting to.
@@ -36,8 +37,8 @@ class CmdMenu : public CmdFrame {
      */
     CmdMenu(vector<pair<std::string, std::function<int()>>> &&menu_event_pairs,
             std::string &&title = "", std::string &&desc = "",
-            std::function<void()> on_enter = nullptr,
-            std::function<void()> on_exit = nullptr, bool memorize = true);
+            bool memorize = false, std::function<void()> on_enter = nullptr,
+            std::function<void()> on_exit = nullptr);
     virtual ~CmdMenu() {}
 
     void Append(std::string &&desc);
@@ -129,9 +130,9 @@ class CmdMenu : public CmdFrame {
     std::string title, desc;
     ArgList args;
     std::function<void()> on_enter, on_exit;
-    bool memorize;
 
   protected:
+    bool memorize;
     int cur_index = 0;
 };
 #endif
